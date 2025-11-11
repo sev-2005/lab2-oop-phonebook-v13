@@ -1,117 +1,200 @@
 #include <iostream>
 #include "note.h"
+#include "phonebook.h" // ДОБАВЛЯЕМ новый заголовочный файл
 
-class PhoneBook
-{
-private:
-	NOTE **contacts;
-	int capacity;
-	int size;
+// УБИРАЕМ старый класс PhoneBook (он теперь в отдельных файлах)
+// ОСТАВЛЯЕМ прототипы функций из первого коммита и ДОБАВЛЯЕМ новые
 
-	void resize();
+PhoneBook book; // Глобальная телефонная книга
 
-public:
-	PhoneBook();
-	~PhoneBook();
-
-	void addContact(NOTE *contact);
-	int getSize() const { return size; }
-	NOTE *getContact(int index) const;
-};
-
-PhoneBook::PhoneBook() : contacts(nullptr), capacity(0), size(0)
-{
-	contacts = new NOTE *[1];
-	capacity = 1;
-	std::cout << "Создана телефонная книга" << std::endl;
-}
-
-PhoneBook::~PhoneBook()
-{
-	for (int i = 0; i < size; i++)
-	{
-		delete contacts[i];
-	}
-	delete[] contacts;
-	std::cout << "Телефонная книга удалена" << std::endl;
-}
-
-void PhoneBook::resize()
-{
-	int newCapacity = capacity * 2 + 1;
-	NOTE **newContacts = new NOTE *[newCapacity];
-
-	for (int i = 0; i < size; i++)
-	{
-		newContacts[i] = contacts[i];
-	}
-
-	delete[] contacts;
-	contacts = newContacts;
-	capacity = newCapacity;
-}
-
-void PhoneBook::addContact(NOTE *contact)
-{
-	if (size >= capacity)
-	{
-		resize();
-	}
-	contacts[size++] = contact;
-}
-
-NOTE *PhoneBook::getContact(int index) const
-{
-	if (index < 0 || index >= size)
-	{
-		throw std::out_of_range("Неверный индекс контакта");
-	}
-	return contacts[index];
-}
-
-// Заглушки функций для будущих коммитов
-void displayMenu()
+void displayMainMenu()
 {
 	std::cout << "\n=== ЗАПИСНАЯ КНИГА (Вариант 13) ===" << std::endl;
-	std::cout << "1. Добавить базовый контакт" << std::endl;
-	std::cout << "2. Добавить рабочий контакт" << std::endl;
-	std::cout << "3. Удалить контакт" << std::endl;
-	std::cout << "4. Редактировать контакт" << std::endl;
-	std::cout << "5. Поиск по месяцу рождения" << std::endl;
-	std::cout << "6. Показать все контакты" << std::endl;
-	std::cout << "7. Обработать английский текст" << std::endl;
+	std::cout << "1. Добавить контакт" << std::endl;
+	std::cout << "2. Удалить контакт" << std::endl;
+	std::cout << "3. Редактировать контакт" << std::endl;
+	std::cout << "4. Поиск по месяцу рождения" << std::endl;
+	std::cout << "5. Показать все контакты" << std::endl;
+	std::cout << "6. Обработать английский текст" << std::endl;
+	std::cout << "7. Информация о книге" << std::endl;
 	std::cout << "0. Выход" << std::endl;
 	std::cout << "Выберите действие: ";
 }
 
+void displayAddMenu()
+{
+	std::cout << "\n=== ДОБАВЛЕНИЕ КОНТАКТА ===" << std::endl;
+	std::cout << "1. Базовый контакт" << std::endl;
+	std::cout << "2. Рабочий контакт" << std::endl;
+	std::cout << "0. Назад" << std::endl;
+	std::cout << "Выберите тип контакта: ";
+}
+
+// ЗАМЕНА старых заглушек на реальную реализацию
 void addBasicContact(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Добавление базового контакта будет реализовано в коммите 2" << std::endl;
+	try
+	{
+		NOTE *newContact = new NOTE();
+		std::cout << "\n--- Создание базового контакта ---" << std::endl;
+		std::cin >> *newContact;
+
+		int position;
+		std::cout << "Введите позицию для добавления (-1 для конца): ";
+		std::cin >> position;
+
+		book.addContact(newContact, position);
+		std::cout << "✅ Базовый контакт успешно добавлен!" << std::endl;
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при добавлении: " << e.what() << std::endl;
+	}
 }
 
 void addWorkContact(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Добавление рабочего контакта будет реализовано в коммите 2" << std::endl;
+	try
+	{
+		char name[100], phone[20], company[100], position[100];
+		int day, month, year;
+
+		std::cout << "\n--- Создание рабочего контакта ---" << std::endl;
+		std::cout << "Введите ФИО: ";
+		std::cin.ignore();
+		std::cin.getline(name, 100);
+
+		std::cout << "Введите телефон: ";
+		std::cin.getline(phone, 20);
+
+		std::cout << "Введите день рождения (день месяц год): ";
+		std::cin >> day >> month >> year;
+
+		std::cout << "Введите компанию: ";
+		std::cin.ignore();
+		std::cin.getline(company, 100);
+
+		std::cout << "Введите должность: ";
+		std::cin.getline(position, 100);
+
+		WorkNote *newContact = new WorkNote(name, phone, day, month, year, company, position);
+
+		int pos;
+		std::cout << "Введите позицию для добавления (-1 для конца): ";
+		std::cin >> pos;
+
+		book.addContact(newContact, pos);
+		std::cout << "✅ Рабочий контакт успешно добавлен!" << std::endl;
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при добавлении: " << e.what() << std::endl;
+	}
 }
 
 void deleteContact(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Удаление контакта будет реализовано в коммите 2" << std::endl;
+	if (book.isEmpty())
+	{
+		std::cout << "📭 Телефонная книга пуста!" << std::endl;
+		return;
+	}
+
+	std::cout << "\n=== УДАЛЕНИЕ КОНТАКТА ===" << std::endl;
+	std::cout << "1. Удалить по индексу" << std::endl;
+	std::cout << "2. Удалить по номеру телефона" << std::endl;
+	std::cout << "0. Назад" << std::endl;
+	std::cout << "Выберите способ: ";
+
+	int choice;
+	std::cin >> choice;
+
+	try
+	{
+		switch (choice)
+		{
+		case 1:
+		{
+			int index;
+			std::cout << "Введите индекс контакта (1-" << book.getSize() << "): ";
+			std::cin >> index;
+			book.removeContact(index - 1);
+			std::cout << "✅ Контакт успешно удален!" << std::endl;
+			break;
+		}
+		case 2:
+		{
+			char phone[20];
+			std::cout << "Введите номер телефона: ";
+			std::cin >> phone;
+			book.removeContactByPhone(phone);
+			std::cout << "✅ Контакт успешно удален!" << std::endl;
+			break;
+		}
+		case 0:
+			return;
+		default:
+			std::cout << "❌ Неверный выбор!" << std::endl;
+		}
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при удалении: " << e.what() << std::endl;
+	}
 }
 
 void editContact(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Редактирование контакта будет реализовано в коммите 2" << std::endl;
+	if (book.isEmpty())
+	{
+		std::cout << "📭 Телефонная книга пуста!" << std::endl;
+		return;
+	}
+
+	std::cout << "\n=== РЕДАКТИРОВАНИЕ КОНТАКТА ===" << std::endl;
+	book.displayAllContacts();
+
+	int index;
+	std::cout << "Введите индекс контакта для редактирования (1-" << book.getSize() << "): ";
+	std::cin >> index;
+
+	try
+	{
+		book.editContact(index - 1);
+		std::cout << "✅ Контакт успешно отредактирован!" << std::endl;
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при редактировании: " << e.what() << std::endl;
+	}
 }
 
 void searchByBirthMonth(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Поиск по месяцу рождения будет реализован в коммите 2" << std::endl;
+	if (book.isEmpty())
+	{
+		std::cout << "📭 Телефонная книга пуста!" << std::endl;
+		return;
+	}
+
+	int month;
+	std::cout << "\n=== ПОИСК ПО МЕСЯЦУ РОЖДЕНИЯ ===" << std::endl;
+	std::cout << "Введите номер месяца (1-12): ";
+	std::cin >> month;
+
+	try
+	{
+		book.findContactsByBirthMonth(month);
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при поиске: " << e.what() << std::endl;
+	}
 }
 
 void displayAllContacts(PhoneBook &book)
 {
-	std::cout << "\n[ЗАГЛУШКА] Показ всех контактов будет реализован в коммите 2" << std::endl;
+	book.displayAllContacts();
 }
 
 void processEnglishText()
@@ -119,6 +202,47 @@ void processEnglishText()
 	std::cout << "\n[ЗАГЛУШКА] Обработка английского текста будет реализована в коммите 3" << std::endl;
 }
 
+// НОВАЯ функция для демонстрации функциональности
+void demonstratePhoneBookFunctionality()
+{
+	std::cout << "\n=== ДЕМОНСТРАЦИЯ РАБОТЫ ЗАПИСНОЙ КНИГИ ===" << std::endl;
+
+	try
+	{
+		// Добавление тестовых контактов в разном алфавитном порядке
+		NOTE *contact1 = new NOTE("Петров Петр", "+79123456789", 15, 5, 1990);
+		NOTE *contact2 = new NOTE("Алексеев Алексей", "+79987654321", 20, 10, 1985);
+		WorkNote *contact3 = new WorkNote("Сидорова Мария", "+79551234567", 10, 3, 1988, "ООО Ромашка", "Директор");
+		NOTE *contact4 = new NOTE("Иванов Иван", "+79031234567", 25, 5, 1992); // Тот же месяц, что и Петров
+
+		book.addContact(contact1);
+		book.addContact(contact2);
+		book.addContact(contact3);
+		book.addContact(contact4);
+
+		std::cout << "\n--- Все контакты после добавления (отсортированы по алфавиту) ---" << std::endl;
+		book.displayAllContacts();
+
+		std::cout << "\n--- Поиск по месяцу рождения (май - месяц 5) ---" << std::endl;
+		book.findContactsByBirthMonth(5);
+
+		std::cout << "\n--- Поиск по несуществующему месяцу (13) ---" << std::endl;
+		try
+		{
+			book.findContactsByBirthMonth(13);
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << "Поймано исключение: " << e.what() << std::endl;
+		}
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "Ошибка: " << e.what() << std::endl;
+	}
+}
+
+// СУЩЕСТВУЮЩАЯ функция из первого коммита (НЕ ТРОГАЕМ)
 void demonstrateClasses()
 {
 	std::cout << "=== ДЕМОНСТРАЦИЯ РАБОТЫ КЛАССОВ ===" << std::endl;
@@ -165,46 +289,72 @@ void demonstrateClasses()
 
 int main()
 {
-	std::cout << "ЛАБОРАТОРНАЯ РАБОТА №2 - КОММИТ 1 (Вариант 13)" << std::endl;
-	std::cout << "Базовая структура классов с наследованием и исключениями" << std::endl;
+	std::cout << "ЛАБОРАТОРНАЯ РАБОТА №2 - КОММИТ 2 (Вариант 13)" << std::endl;
+	std::cout << "Полная функциональность записной книги" << std::endl;
 
-	PhoneBook book;
+	// Демонстрация из первого коммита
 	demonstrateClasses();
 
+	// Новая демонстрация для второго коммита
+	demonstratePhoneBookFunctionality();
+
+	// Основное меню (обновленное)
 	int choice;
 	do
 	{
-		displayMenu();
+		displayMainMenu();
 		std::cin >> choice;
 
 		switch (choice)
 		{
 		case 1:
-			addBasicContact(book);
+		{
+			int addChoice;
+			do
+			{
+				displayAddMenu();
+				std::cin >> addChoice;
+				switch (addChoice)
+				{
+				case 1:
+					addBasicContact(book);
+					break;
+				case 2:
+					addWorkContact(book);
+					break;
+				case 0:
+					break;
+				default:
+					std::cout << "❌ Неверный выбор!" << std::endl;
+				}
+			} while (addChoice != 0);
 			break;
+		}
 		case 2:
-			addWorkContact(book);
-			break;
-		case 3:
 			deleteContact(book);
 			break;
-		case 4:
+		case 3:
 			editContact(book);
 			break;
-		case 5:
+		case 4:
 			searchByBirthMonth(book);
 			break;
-		case 6:
+		case 5:
 			displayAllContacts(book);
 			break;
-		case 7:
+		case 6:
 			processEnglishText();
+			break;
+		case 7:
+			std::cout << "📊 Информация о телефонной книге:" << std::endl;
+			std::cout << "Количество контактов: " << book.getSize() << std::endl;
+			std::cout << "Состояние: " << (book.isEmpty() ? "пуста" : "есть контакты") << std::endl;
 			break;
 		case 0:
 			std::cout << "Выход из программы..." << std::endl;
 			break;
 		default:
-			std::cout << "Неверный выбор!" << std::endl;
+			std::cout << "❌ Неверный выбор!" << std::endl;
 		}
 	} while (choice != 0);
 
