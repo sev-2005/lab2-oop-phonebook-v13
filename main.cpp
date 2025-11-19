@@ -1,22 +1,36 @@
 #include <iostream>
 #include "note.h"
-#include "phonebook.h" // ДОБАВЛЯЕМ новый заголовочный файл
+#include "phonebook.h"
+#include "textprocessor.h"
 
-// УБИРАЕМ старый класс PhoneBook (он теперь в отдельных файлах)
-// ОСТАВЛЯЕМ прототипы функций из первого коммита и ДОБАВЛЯЕМ новые
+// Прототипы функций
+void displayMainMenu();
+void displayAddMenu();
+void addBasicContact(PhoneBook &book);
+void addWorkContact(PhoneBook &book);
+void deleteContact(PhoneBook &book);
+void searchByBirthMonth(PhoneBook &book);
+void displayAllContacts(PhoneBook &book);
+void editContact(PhoneBook &book);
+void processEnglishText();
+void demonstratePhoneBookFunctionality();
+void demonstrateClasses();
+void demonstrateTextProcessing();
 
-PhoneBook book; // Глобальная телефонная книга
+// Глобальные объекты
+PhoneBook book;
+TextProcessor textProcessor;
 
 void displayMainMenu()
 {
-	std::cout << "\n=== ЗАПИСНАЯ КНИГА (Вариант 13) ===" << std::endl;
+	std::cout << "\n=== СИСТЕМА УПРАВЛЕНИЯ ЗАПИСНОЙ КНИГОЙ (Вариант 13) ===" << std::endl;
 	std::cout << "1. Добавить контакт" << std::endl;
 	std::cout << "2. Удалить контакт" << std::endl;
 	std::cout << "3. Редактировать контакт" << std::endl;
 	std::cout << "4. Поиск по месяцу рождения" << std::endl;
 	std::cout << "5. Показать все контакты" << std::endl;
 	std::cout << "6. Обработать английский текст" << std::endl;
-	std::cout << "7. Информация о книге" << std::endl;
+	std::cout << "7. Информация о системе" << std::endl;
 	std::cout << "0. Выход" << std::endl;
 	std::cout << "Выберите действие: ";
 }
@@ -30,7 +44,6 @@ void displayAddMenu()
 	std::cout << "Выберите тип контакта: ";
 }
 
-// ЗАМЕНА старых заглушек на реальную реализацию
 void addBasicContact(PhoneBook &book)
 {
 	try
@@ -40,7 +53,7 @@ void addBasicContact(PhoneBook &book)
 		std::cin >> *newContact;
 
 		int position;
-		std::cout << "Введите позицию для добавления (-1 для конца): ";
+		std::cout << "Введите позицию для добавления (-1 для автоматической в конец): ";
 		std::cin >> position;
 
 		book.addContact(newContact, position);
@@ -80,7 +93,7 @@ void addWorkContact(PhoneBook &book)
 		WorkNote *newContact = new WorkNote(name, phone, day, month, year, company, position);
 
 		int pos;
-		std::cout << "Введите позицию для добавления (-1 для конца): ";
+		std::cout << "Введите позицию для добавления (-1 для автоматической в конец): ";
 		std::cin >> pos;
 
 		book.addContact(newContact, pos);
@@ -199,10 +212,23 @@ void displayAllContacts(PhoneBook &book)
 
 void processEnglishText()
 {
-	std::cout << "\n[ЗАГЛУШКА] Обработка английского текста будет реализована в коммите 3" << std::endl;
+	try
+	{
+		char filename[100];
+		std::cout << "\n=== ОБРАБОТКА АНГЛИЙСКОГО ТЕКСТА ===" << std::endl;
+		std::cout << "Введите имя файла: ";
+		std::cin.ignore();
+		std::cin.getline(filename, 100);
+
+		textProcessor.setFilename(filename);
+		textProcessor.processEnglishText();
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "❌ Ошибка при обработке файла: " << e.what() << std::endl;
+	}
 }
 
-// НОВАЯ функция для демонстрации функциональности
 void demonstratePhoneBookFunctionality()
 {
 	std::cout << "\n=== ДЕМОНСТРАЦИЯ РАБОТЫ ЗАПИСНОЙ КНИГИ ===" << std::endl;
@@ -213,14 +239,15 @@ void demonstratePhoneBookFunctionality()
 		NOTE *contact1 = new NOTE("Петров Петр", "+79123456789", 15, 5, 1990);
 		NOTE *contact2 = new NOTE("Алексеев Алексей", "+79987654321", 20, 10, 1985);
 		WorkNote *contact3 = new WorkNote("Сидорова Мария", "+79551234567", 10, 3, 1988, "ООО Ромашка", "Директор");
-		NOTE *contact4 = new NOTE("Иванов Иван", "+79031234567", 25, 5, 1992); // Тот же месяц, что и Петров
+		NOTE *contact4 = new NOTE("Иванов Иван", "+79031234567", 25, 5, 1992);
 
+		std::cout << "\nДобавление контактов..." << std::endl;
 		book.addContact(contact1);
 		book.addContact(contact2);
 		book.addContact(contact3);
 		book.addContact(contact4);
 
-		std::cout << "\n--- Все контакты после добавления (отсортированы по алфавиту) ---" << std::endl;
+		std::cout << "\n--- Все контакты (отсортированы по алфавиту) ---" << std::endl;
 		book.displayAllContacts();
 
 		std::cout << "\n--- Поиск по месяцу рождения (май - месяц 5) ---" << std::endl;
@@ -242,7 +269,35 @@ void demonstratePhoneBookFunctionality()
 	}
 }
 
-// СУЩЕСТВУЮЩАЯ функция из первого коммита (НЕ ТРОГАЕМ)
+void demonstrateTextProcessing()
+{
+	std::cout << "\n=== ДЕМОНСТРАЦИЯ ОБРАБОТКИ АНГЛИЙСКОГО ТЕКСТА ===" << std::endl;
+
+	try
+	{
+		// Создаем тестовый файл с английским текстом
+		std::ofstream testFile("english_text.txt");
+		if (testFile.is_open())
+		{
+			testFile << "this is a sample english text.\n";
+			testFile << "apple and orange are fruits. elephant is a big animal.\n";
+			testFile << "important information: always check your code.\n";
+			testFile << "umbrella is useful in rain. island is surrounded by water.\n";
+			testFile.close();
+
+			std::cout << "Создан тестовый файл: english_text.txt" << std::endl;
+		}
+
+		// Демонстрируем обработку
+		TextProcessor processor("english_text.txt");
+		processor.processEnglishText();
+	}
+	catch (const std::exception &e)
+	{
+		std::cout << "Ошибка при демонстрации: " << e.what() << std::endl;
+	}
+}
+
 void demonstrateClasses()
 {
 	std::cout << "=== ДЕМОНСТРАЦИЯ РАБОТЫ КЛАССОВ ===" << std::endl;
@@ -289,16 +344,23 @@ void demonstrateClasses()
 
 int main()
 {
-	std::cout << "ЛАБОРАТОРНАЯ РАБОТА №2 - КОММИТ 2 (Вариант 13)" << std::endl;
-	std::cout << "Полная функциональность записной книги" << std::endl;
+	std::cout << "ЛАБОРАТОРНАЯ РАБОТА №2 - ВАРИАНТ 13" << std::endl;
+	std::cout << "Система управления записной книгой и обработки английского текста" << std::endl;
+	std::cout << "==================================================================" << std::endl;
 
-	// Демонстрация из первого коммита
+	// Демонстрация работы классов
 	demonstrateClasses();
 
-	// Новая демонстрация для второго коммита
+	// Демонстрация работы записной книги
 	demonstratePhoneBookFunctionality();
 
-	// Основное меню (обновленное)
+	// Демонстрация обработки текста
+	demonstrateTextProcessing();
+
+	std::cout << "\n==================================================================" << std::endl;
+	std::cout << "Демонстрация завершена. Переходим в режим меню." << std::endl;
+
+	// Основное меню
 	int choice;
 	do
 	{
@@ -346,9 +408,17 @@ int main()
 			processEnglishText();
 			break;
 		case 7:
-			std::cout << "📊 Информация о телефонной книге:" << std::endl;
+			std::cout << "\n=== ИНФОРМАЦИЯ О СИСТЕМЕ ===" << std::endl;
 			std::cout << "Количество контактов: " << book.getSize() << std::endl;
-			std::cout << "Состояние: " << (book.isEmpty() ? "пуста" : "есть контакты") << std::endl;
+			std::cout << "Состояние книги: " << (book.isEmpty() ? "пуста" : "есть контакты") << std::endl;
+			if (textProcessor.getFilename())
+			{
+				std::cout << "Текущий файл для обработки: " << textProcessor.getFilename() << std::endl;
+			}
+			else
+			{
+				std::cout << "Файл для обработки не установлен" << std::endl;
+			}
 			break;
 		case 0:
 			std::cout << "Выход из программы..." << std::endl;
